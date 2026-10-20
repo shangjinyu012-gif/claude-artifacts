@@ -2,7 +2,7 @@
 
 Claude Code 与 DDD 的中文速查合集，在 Claude Artifact 里发布，源码在这里维护。
 
-在线版：<https://claude.ai/artifact/WispTTwKvreJbTf6daKjM2>（Claude Artifact，需登录 claude.ai 查看）
+在线版：<https://claude.ai/artifact/KYdKJ4vbspNUufWzwqVjVQ>（Claude Artifact，需登录 claude.ai 查看）
 
 ## 内容
 
