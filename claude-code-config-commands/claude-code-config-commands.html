@@ -1,0 +1,164 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<style>
+  :root{
+    --bg:#F0EEE6;
+    --card:#FCFBF7;
+    --ink:#1F1E1D;
+    --muted:#78736A;
+    --accent:#C96442;
+    --accent-soft:#F6E7DF;
+    --line:#E2DED2;
+    --chip-bg:#FFFFFF;
+    --chip-line:#D6D0C0;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{
+    background:var(--bg);
+    color:var(--ink);
+    font-family:"PingFang SC","Helvetica Neue",-apple-system,sans-serif;
+    width:2400px;
+    padding:52px 48px 40px;
+    -webkit-font-smoothing:antialiased;
+  }
+  header{display:flex;align-items:flex-start;gap:22px;margin-bottom:14px}
+  .logo{flex:none;margin-top:4px}
+  h1{font-family:Georgia,"Songti SC",serif;font-size:46px;font-weight:400;letter-spacing:-.5px;line-height:1.1}
+  .sub{font-size:16px;color:var(--muted);margin-top:10px;line-height:1.6}
+  .sub b{color:var(--accent);font-weight:600}
+  .rule{height:1px;background:var(--line);margin:26px 0 8px}
+
+  .section{display:flex;align-items:baseline;gap:16px;margin:26px 0 20px}
+  .section .no{font-family:Georgia,serif;font-size:40px;color:var(--accent);line-height:1}
+  .section h3{font-family:Georgia,"Songti SC",serif;font-size:30px;font-weight:400;letter-spacing:-.3px}
+  .section .meta{font-size:14.5px;color:var(--muted)}
+  .section .fill{flex:1;height:1px;background:var(--line);align-self:center}
+
+  .grid{display:flex;align-items:flex-start;gap:22px}
+  .col{flex:1;min-width:0}
+  .card{
+    background:var(--card);
+    border:1px solid var(--line);
+    border-radius:12px;
+    padding:16px 18px 12px;
+    margin:0 0 22px;
+  }
+  .card.hi{border-color:var(--accent);background:#FBF3EF}
+  .card.dim{background:transparent;border-style:dashed}
+  .card h2{
+    font-family:Georgia,"Songti SC",serif;
+    font-size:20px;font-weight:400;letter-spacing:-.2px;
+    display:flex;align-items:baseline;gap:8px;
+  }
+  .card h2 .cn{font-family:"PingFang SC",sans-serif;font-size:12.5px;color:var(--muted);font-weight:400}
+  .card.hi h2{color:var(--accent)}
+  .card > .note{font-size:12px;color:var(--muted);margin-top:5px;line-height:1.5}
+  ul{list-style:none;margin-top:10px}
+  li{padding:7px 0;border-top:1px solid #EDEAE0}
+  li:first-child{border-top:none;padding-top:2px}
+
+  .head{display:flex;flex-wrap:wrap;align-items:center;gap:4px 5px;margin-bottom:3px}
+  code{
+    font-family:"SF Mono",ui-monospace,Menlo,monospace;
+    font-size:12px;line-height:1;
+    background:var(--chip-bg);
+    border:1px solid var(--chip-line);
+    border-bottom-width:2px;
+    border-radius:5px;
+    padding:4px 6px;
+    color:#332F29;
+    white-space:nowrap;
+  }
+  .card.hi code{border-color:#E3C4B5}
+  .arg{font-family:"SF Mono",ui-monospace,Menlo,monospace;font-size:11px;color:#9A9385}
+  .key{font-family:"SF Mono",ui-monospace,Menlo,monospace;font-size:10.5px;color:#A39C8E}
+  .alias{font-family:"SF Mono",ui-monospace,Menlo,monospace;font-size:10.5px;color:#8C8577;
+         border:1px dashed #D6D0C0;border-radius:4px;padding:2px 5px}
+  .sep{font-size:10.5px;color:#B5AE9E;padding:0 1px}
+  .tag{font-size:10px;line-height:1;border-radius:9px;padding:3px 7px;white-space:nowrap}
+  .tag.skill{color:var(--accent);background:var(--accent-soft)}
+  .tag.wf{color:#FCFBF7;background:var(--accent)}
+  .tag.guess{color:#8A6D1F;background:#F3EACB}
+  .desc{font-size:12.5px;color:#4A463F;line-height:1.5}
+  .desc em{font-style:normal;color:var(--accent);font-weight:600}
+  .opts{display:flex;flex-wrap:wrap;gap:4px;margin-top:5px}
+  .pill{font-family:"SF Mono",ui-monospace,Menlo,monospace;font-size:10.5px;line-height:1;
+        color:#6B665C;background:#F4F2EC;border:1px solid #E6E2D6;border-radius:10px;padding:3px 7px;white-space:nowrap}
+  .pill.def{color:var(--accent);background:#FFF;border-color:var(--accent);font-weight:600}
+
+  footer{
+    margin-top:6px;padding-top:18px;border-top:1px solid var(--line);
+    display:flex;justify-content:space-between;align-items:center;
+    font-size:12.5px;color:var(--muted);
+  }
+  footer code{font-size:11.5px;padding:2px 5px;border-bottom-width:1px}
+</style>
+</head>
+<body>
+
+<header>
+  <svg class="logo" width="48" height="48" viewBox="0 0 100 100">
+    <g fill="#C96442">
+      <g id="p"><path d="M50 10 L54 46 L50 50 L46 46 Z"/></g>
+      <use href="#p" transform="rotate(30 50 50)"/><use href="#p" transform="rotate(60 50 50)"/>
+      <use href="#p" transform="rotate(90 50 50)"/><use href="#p" transform="rotate(120 50 50)"/>
+      <use href="#p" transform="rotate(150 50 50)"/><use href="#p" transform="rotate(180 50 50)"/>
+      <use href="#p" transform="rotate(210 50 50)"/><use href="#p" transform="rotate(240 50 50)"/>
+      <use href="#p" transform="rotate(270 50 50)"/><use href="#p" transform="rotate(300 50 50)"/>
+      <use href="#p" transform="rotate(330 50 50)"/>
+    </g>
+  </svg>
+  <div>
+    <h1>Claude Code 配置与斜杠命令速查</h1>
+    <p class="sub">
+      上半部分是 <b>/config</b> 设置界面的 45 项配置，下半部分是官方文档列出的全部 112 条<b>斜杠命令</b>（同一行里的别名已合并）。依据 2026-09-15 抓取的官方文档，本机 CLI 版本 2.1.272。<br>
+      配置项：灰色小字是 settings 里的键名，<b>橙色描边</b>的选项是默认值。命令：<span class="alias">虚线框</span> 是别名，<span class="tag skill">技能</span> 是内置 Skill，<span class="tag wf">工作流</span> 是后台多 agent 工作流，<span class="tag guess">推断</span> 表示官方文档里没有写，按名称和相关文档推断。
+    </p>
+  </div>
+</header>
+
+<div class="rule"></div>
+
+<div class="section"><span class="no">01</span><h3>/config 设置项</h3><span class="meta">45 项 · 按用途分 7 组</span><span class="fill"></span></div>
+<div class="grid" id="cfg"></div>
+
+<div class="section"><span class="no">02</span><h3>斜杠命令</h3><span class="meta">112 条 · 在输入框开头输入 / 触发，后面的文字作为参数</span><span class="fill"></span></div>
+<div class="grid" id="cmd"></div>
+
+<footer>
+  <span>用户设置 <code>~/.claude/settings.json</code>　·　全局配置 <code>~/.claude.json</code>　·　文档 <code>code.claude.com/docs/en/settings-reference</code>　<code>…/commands</code></span>
+  <span>Claude 回复中途发出的命令会排队，/status、/tasks、/usage 除外　·　自定义技能和 MCP prompt 也会出现在 / 菜单</span>
+</footer>
+
+<script src="data.js"></script>
+<script>
+// ───────── 渲染
+const TAG = {skill:'<span class="tag skill">技能</span>', wf:'<span class="tag wf">工作流</span>'};
+const pills = spec => spec.split("|").map(o => o.endsWith("*")
+  ? `<span class="pill def">${o.slice(0,-1)}</span>` : `<span class="pill">${o}</span>`).join("");
+
+const cfgRow = ([name,key,desc,opts,guess]) => `<li>
+  <div class="head"><code>${name}</code>${key!=="—"?`<span class="key">${key}</span>`:""}${guess?'<span class="tag guess">推断</span>':""}</div>
+  <div class="desc">${desc}</div>
+  <div class="opts">${pills(opts)}</div></li>`;
+
+const cmdRow = ([c,arg,al,tag,desc]) => `<li>
+  <div class="head">${c.split("|").map(x=>`<code>${x}</code>`).join('<span class="sep">/</span>')}${arg?`<span class="arg">${arg}</span>`:""}${al?al.split("|").map(a=>`<span class="alias">/${a}</span>`).join(""):""}${tag?TAG[tag]:""}</div>
+  <div class="desc">${desc}</div></li>`;
+
+const card = (c, rowFn) => `<div class="card${c.hi?" hi":""}${c.dim?" dim":""}">
+  <h2>${c.title}<span class="cn">${c.cn}</span></h2>
+  ${c.note?`<p class="note">${c.note}</p>`:""}
+  <ul>${c.rows.map(rowFn).join("")}</ul></div>`;
+
+const render = (id, data, cols, rowFn) => {
+  document.getElementById(id).innerHTML = cols.map(names =>
+    `<div class="col">${names.map(n => card({...data[n], title: data[n].t}, rowFn)).join("")}</div>`).join("");
+};
+render("cfg", CFG, CFG_COLS, cfgRow);
+render("cmd", CMD, CMD_COLS, cmdRow);
+</script>
+</body>
+</html>

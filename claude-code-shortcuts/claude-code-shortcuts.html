@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<style>
+  :root{
+    --bg:#F0EEE6;
+    --card:#FCFBF7;
+    --ink:#1F1E1D;
+    --muted:#78736A;
+    --accent:#C96442;
+    --accent-soft:#E8D9D1;
+    --line:#E2DED2;
+    --kbd-bg:#FFFFFF;
+    --kbd-line:#D6D0C0;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{
+    background:var(--bg);
+    color:var(--ink);
+    font-family:"PingFang SC","Helvetica Neue",-apple-system,sans-serif;
+    width:2200px;
+    padding:52px 48px 40px;
+    -webkit-font-smoothing:antialiased;
+  }
+  header{display:flex;align-items:flex-start;gap:22px;margin-bottom:14px}
+  .logo{flex:none;margin-top:4px}
+  h1{font-family:Georgia,"Songti SC",serif;font-size:44px;font-weight:400;letter-spacing:-.5px;line-height:1.1}
+  .sub{font-size:16px;color:var(--muted);margin-top:9px;line-height:1.55}
+  .sub b{color:var(--accent);font-weight:600}
+  .rule{height:1px;background:var(--line);margin:26px 0 24px}
+
+  .grid{display:flex;align-items:flex-start;gap:22px}
+  .col{flex:1;min-width:0}
+  .card{
+    background:var(--card);
+    border:1px solid var(--line);
+    border-radius:12px;
+    padding:16px 18px 14px;
+    margin:0 0 22px;
+  }
+  .card.hi{border-color:var(--accent);background:#FBF3EF}
+  .card h2{
+    font-family:Georgia,"Songti SC",serif;
+    font-size:19px;font-weight:400;letter-spacing:-.2px;
+    display:flex;align-items:baseline;gap:8px;
+  }
+  .card h2 .cn{font-family:"PingFang SC",sans-serif;font-size:12.5px;color:var(--muted);font-weight:400}
+  .card.hi h2{color:var(--accent)}
+  .card > .note{font-size:12px;color:var(--muted);margin-top:5px;line-height:1.5}
+  ul{list-style:none;margin-top:11px}
+  li{padding:6px 0;border-top:1px solid #EDEAE0}
+  li:first-child{border-top:none;padding-top:2px}
+  .keys{display:flex;flex-wrap:wrap;align-items:center;gap:3px;margin-bottom:3px}
+  kbd{
+    font-family:"SF Mono",ui-monospace,Menlo,monospace;
+    font-size:11.5px;line-height:1;
+    background:var(--kbd-bg);
+    border:1px solid var(--kbd-line);
+    border-bottom-width:2px;
+    border-radius:5px;
+    padding:4px 6px;
+    color:#332F29;
+    white-space:nowrap;
+  }
+  .plus{font-size:10px;color:#B5AE9E;padding:0 1px}
+  .or{font-size:10.5px;color:#A9A294;padding:0 4px}
+  .chord{font-size:10.5px;color:var(--accent);padding:0 5px;letter-spacing:.5px}
+  .desc{font-size:12.5px;color:#4A463F;line-height:1.5}
+  .desc em{font-style:normal;color:var(--accent);font-weight:600}
+
+  footer{
+    margin-top:6px;padding-top:18px;border-top:1px solid var(--line);
+    display:flex;justify-content:space-between;align-items:center;
+    font-size:12.5px;color:var(--muted);
+  }
+  footer code{font-family:"SF Mono",ui-monospace,Menlo,monospace;color:#5A554B}
+</style>
+</head>
+<body>
+
+<header>
+  <svg class="logo" width="46" height="46" viewBox="0 0 100 100">
+    <g fill="#C96442">
+      <g id="p"><path d="M50 10 L54 46 L50 50 L46 46 Z"/></g>
+      <use href="#p" transform="rotate(30 50 50)"/><use href="#p" transform="rotate(60 50 50)"/>
+      <use href="#p" transform="rotate(90 50 50)"/><use href="#p" transform="rotate(120 50 50)"/>
+      <use href="#p" transform="rotate(150 50 50)"/><use href="#p" transform="rotate(180 50 50)"/>
+      <use href="#p" transform="rotate(210 50 50)"/><use href="#p" transform="rotate(240 50 50)"/>
+      <use href="#p" transform="rotate(270 50 50)"/><use href="#p" transform="rotate(300 50 50)"/>
+      <use href="#p" transform="rotate(330 50 50)"/>
+    </g>
+  </svg>
+  <div>
+    <h1>Claude Code 快捷键速查</h1>
+    <p class="sub">
+      按 <b>context（生效场景）</b> 分组 —— 同一个键在不同界面含义不同，只有处于该场景时绑定才生效。<br>
+      <b>meta</b> 在 macOS 终端通常是 Option（需开启 "Use Option as Meta"），与单列出的 cmd 不是一回事。<br>
+      <b>▸</b> 表示「和弦」：先按前一组，松开，再按后一组 —— 例如 ctrl+x <b>▸</b> ctrl+k。<b>或</b> 表示多个等价键位。
+    </p>
+  </div>
+</header>
+
+<div class="rule"></div>
+<div class="grid" id="grid"></div>
+
+<footer>
+  <span>配置文件 <code>~/.claude/keybindings.json</code>　·　文档 <code>code.claude.com/docs/en/keybindings</code></span>
+  <span>键位刻意兼容三套肌肉记忆：方向键 · vim(hjkl/g/G) · emacs(ctrl+n/ctrl+p)</span>
+</footer>
+
+<script src="data.js"></script>
+<script>
+const combo = s => s.split("+").map(k=>`<kbd>${k}</kbd>`).join('<span class="plus">+</span>');
+const keyHTML = spec => spec.split("|")
+  .map(alt => alt.split(" ").map(combo).join('<span class="chord">▸</span>')) // 空格 = 和弦，先后按
+  .join('<span class="or">或</span>');
+
+const cardHTML = c => `
+  <div class="card${c.hi?" hi":""}">
+    <h2>${c.t}<span class="cn">${c.cn}</span></h2>
+    ${c.note?`<p class="note">${c.note}</p>`:""}
+    <ul>${c.rows.map(([k,d])=>`<li><div class="keys">${keyHTML(k)}</div><div class="desc">${d}</div></li>`).join("")}</ul>
+  </div>`;
+
+const byName = Object.fromEntries(KEYS.map(c=>[c.t,c]));
+document.getElementById("grid").innerHTML = KEYS_COLS
+  .map(names => `<div class="col">${names.map(n=>cardHTML(byName[n])).join("")}</div>`)
+  .join("");
+</script>
+</body>
+</html>

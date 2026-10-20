@@ -1,0 +1,740 @@
+<title>Claude Code 与 DDD 速查</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap">
+<style>
+  :root{
+    --bg:#F0EEE6;
+    --surface:#FAF9F5;
+    --surface-hi:#FBF1EB;
+    --ink:#1F1E1D;
+    --ink-2:#48443D;
+    --muted:#6E695F;
+    --faint:#9C9588;
+    --accent:#C15F3C;
+    --accent-soft:#F4E2D8;
+    --on-accent:#FFFFFF;
+    --line:#E1DDD1;
+    --line-soft:#ECE9E0;
+    --chip-bg:#FFFFFF;
+    --chip-line:#D5CFC0;
+    --pill-bg:#F2F0E9;
+    --guess-fg:#7D621A;
+    --guess-bg:#F1E7C6;
+    --focus:#C15F3C;
+    --serif:"Source Serif 4","Songti SC","Noto Serif SC",Georgia,serif;
+    --sans:"PingFang SC","Hiragino Sans GB","Microsoft YaHei",-apple-system,"Helvetica Neue",sans-serif;
+    --mono:"JetBrains Mono","SF Mono",ui-monospace,Menlo,Consolas,monospace;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg:#1E1D1B; --surface:#282725; --surface-hi:#33261F; --ink:#ECEAE3; --ink-2:#CFCBC1;
+      --muted:#A39E93; --faint:#7F7A70; --accent:#E07F5A; --accent-soft:#442C22; --on-accent:#1E1D1B;
+      --line:#3A3834; --line-soft:#32302D; --chip-bg:#1E1D1B; --chip-line:#4A4741; --pill-bg:#302E2B;
+      --guess-fg:#E3C67A; --guess-bg:#3D3420; --focus:#E07F5A;
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:#1E1D1B; --surface:#282725; --surface-hi:#33261F; --ink:#ECEAE3; --ink-2:#CFCBC1;
+    --muted:#A39E93; --faint:#7F7A70; --accent:#E07F5A; --accent-soft:#442C22; --on-accent:#1E1D1B;
+    --line:#3A3834; --line-soft:#32302D; --chip-bg:#1E1D1B; --chip-line:#4A4741; --pill-bg:#302E2B;
+    --guess-fg:#E3C67A; --guess-bg:#3D3420; --focus:#E07F5A;
+  }
+
+  *{box-sizing:border-box}
+  [hidden]{display:none !important}
+  body{
+    margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:14px;
+    padding-inline:clamp(16px,3.5vw,44px);-webkit-font-smoothing:antialiased;
+  }
+  :focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+
+  /* ── 外框：左侧菜单 + 右侧内容 ───────────────────────────── */
+  .shell{max-width:1640px;margin-inline:auto;display:grid;grid-template-columns:238px minmax(0,1fr);gap:clamp(20px,3vw,44px)}
+  .side{position:sticky;top:0;align-self:start;max-height:100vh;overflow-y:auto;padding-block:32px 24px}
+  .brand{display:flex;gap:10px;align-items:center}
+  .brand .logo{flex:none;width:30px;height:30px}
+  .brand b{font-family:var(--serif);font-weight:400;font-size:20px;line-height:1.1;display:block}
+  .brand small{display:block;font-size:11px;color:var(--faint);margin-top:2px;letter-spacing:.04em}
+  nav{margin-top:24px;display:flex;flex-direction:column;gap:3px}
+  .navgroup{margin:18px 0 6px;font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--faint)}
+  .navgroup:first-child{margin-top:0}
+  nav button{
+    font:inherit;font-size:13.5px;color:var(--ink-2);background:transparent;border:0;border-radius:8px;
+    padding:9px 11px;cursor:pointer;width:100%;text-align:left;
+    display:flex;justify-content:space-between;align-items:center;gap:10px;
+  }
+  nav button:hover{background:var(--surface)}
+  nav button .n{font-family:var(--mono);font-size:11px;color:var(--faint);font-variant-numeric:tabular-nums}
+  nav button.hit .n{color:var(--accent)}
+  nav button[aria-current="page"]{background:var(--accent);color:var(--on-accent)}
+  nav button[aria-current="page"] .n{color:var(--on-accent);opacity:.8}
+  .sidefoot{margin-top:24px;font-size:11.5px;line-height:1.75;color:var(--faint)}
+  .sidefoot code{font-size:10.5px;border-bottom-width:1px}
+  main{min-width:0;padding-block:34px 48px}
+
+  @media (max-width:899px){
+    .shell{grid-template-columns:minmax(0,1fr);gap:0}
+    .side{position:static;max-height:none;padding-block:22px 12px;border-bottom:1px solid var(--line)}
+    nav{flex-direction:row;flex-wrap:wrap;gap:6px;margin-top:16px}
+    .navgroup{display:none}
+    nav button{width:auto;border:1px solid var(--chip-line);background:var(--surface);padding:7px 12px;font-size:13px}
+    .sidefoot{display:none}
+    main{padding-block:22px 40px}
+  }
+
+  /* ── 页头与工具条 ────────────────────────────────────── */
+  h1{font-family:var(--serif);font-weight:400;font-size:clamp(26px,3.4vw,38px);line-height:1.14;letter-spacing:-.01em;margin:0;text-wrap:balance}
+  .lede{margin:10px 0 0;color:var(--muted);line-height:1.7;max-width:70ch}
+  .lede b{color:var(--accent);font-weight:600}
+  .lede code{font-size:11.5px}
+
+  .toolbar{
+    position:sticky;top:0;z-index:5;margin-top:22px;padding-block:12px;
+    background:var(--bg);border-bottom:1px solid var(--line);
+    display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center;
+  }
+  .search{position:relative;flex:1 1 320px;max-width:520px}
+  .search input{
+    width:100%;font:inherit;color:var(--ink);background:var(--surface);
+    border:1px solid var(--chip-line);border-radius:10px;padding:10px 12px 10px 38px;
+  }
+  .search input::placeholder{color:var(--faint)}
+  .search .slash{
+    position:absolute;left:10px;top:50%;transform:translateY(-50%);
+    font-family:var(--mono);font-size:12px;color:var(--accent);
+    border:1px solid var(--chip-line);border-bottom-width:2px;border-radius:5px;padding:1px 6px;background:var(--chip-bg);
+  }
+  .count{font-size:12.5px;color:var(--muted);font-variant-numeric:tabular-nums}
+  .legend{display:flex;flex-wrap:wrap;gap:8px 16px;margin-top:12px;font-size:12px;color:var(--muted);align-items:center}
+  .legend > span{display:inline-flex;gap:6px;align-items:center}
+
+  /* ── 速查卡片 ──────────────────────────────────────── */
+  .page{display:none}
+  .page.on{display:block}
+  .groups{columns:310px;column-gap:16px;margin-top:26px}
+  .card{
+    display:inline-block;width:100%;break-inside:avoid;margin:0 0 16px;
+    background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px 16px 8px;
+  }
+  .card.hi{background:var(--surface-hi);border-color:var(--accent)}
+  .card.dim{background:transparent;border-style:dashed}
+  .card h3{font-family:var(--serif);font-weight:400;font-size:19px;margin:0;display:flex;gap:8px;align-items:baseline;flex-wrap:wrap}
+  .card.hi h3{color:var(--accent)}
+  .card h3 .cn{font-family:var(--sans);font-size:12px;color:var(--muted)}
+  .card ul{list-style:none;margin:8px 0 0;padding:0}
+  .card li{padding:8px 0;border-top:1px solid var(--line-soft)}
+  .card li:first-child{border-top:0;padding-top:2px}
+  .card .note{margin:5px 0 0;font-size:12px;color:var(--muted);line-height:1.5}
+
+  .head{display:flex;flex-wrap:wrap;align-items:center;gap:4px 6px;margin-bottom:3px}
+  code{
+    font-family:var(--mono);font-size:12px;line-height:1.2;color:var(--ink);
+    background:var(--chip-bg);border:1px solid var(--chip-line);border-bottom-width:2px;border-radius:5px;padding:2px 6px;
+    overflow-wrap:anywhere;
+  }
+  kbd{
+    font-family:var(--mono);font-size:11.5px;line-height:1.2;color:var(--ink);white-space:nowrap;
+    background:var(--chip-bg);border:1px solid var(--chip-line);border-bottom-width:2px;border-radius:5px;padding:2px 6px;
+  }
+  .alt{display:inline-flex;align-items:center;gap:3px;white-space:nowrap}
+  .plus{font-size:10px;color:var(--faint)}
+  .or{font-size:11px;color:var(--faint);padding-inline:3px}
+  .chord{font-size:11px;color:var(--accent);padding-inline:2px}
+  .arg{font-family:var(--mono);font-size:11px;color:var(--faint);overflow-wrap:anywhere}
+  .key{font-family:var(--mono);font-size:10.5px;color:var(--faint);overflow-wrap:anywhere}
+  .alias{font-family:var(--mono);font-size:10.5px;color:var(--muted);border:1px dashed var(--chip-line);border-radius:4px;padding:1px 5px}
+  .sep{font-size:11px;color:var(--faint)}
+  .tag{font-size:10.5px;line-height:1;border-radius:9px;padding:3px 7px;white-space:nowrap}
+  .tag.skill{color:var(--accent);background:var(--accent-soft)}
+  .tag.wf{color:var(--on-accent);background:var(--accent)}
+  .tag.guess{color:var(--guess-fg);background:var(--guess-bg)}
+  .desc{font-size:13px;color:var(--ink-2);line-height:1.55}
+  .desc em{font-style:normal;color:var(--accent);font-weight:600}
+  .opts{display:flex;flex-wrap:wrap;gap:4px;margin-top:6px}
+  .pill{font-family:var(--mono);font-size:10.5px;line-height:1;color:var(--muted);background:var(--pill-bg);
+        border:1px solid var(--line);border-radius:10px;padding:3px 7px}
+  .pill.def{color:var(--accent);background:var(--surface);border-color:var(--accent);font-weight:600}
+  .empty{margin-top:40px;color:var(--muted);text-align:center}
+  .empty code{font-size:12px}
+
+  /* ── 笔记正文 ──────────────────────────────────────── */
+  .toc{display:flex;flex-wrap:wrap;gap:6px;margin-top:22px}
+  .toc a{font-size:12.5px;color:var(--ink-2);text-decoration:none;background:var(--surface);
+         border:1px solid var(--line);border-radius:20px;padding:5px 12px}
+  .toc a:hover{border-color:var(--accent);color:var(--accent)}
+  .prose > section{margin-top:38px;scroll-margin-top:24px;max-width:1060px}
+  .prose h2{font-family:var(--serif);font-weight:400;font-size:25px;margin:0;letter-spacing:-.01em;
+            display:flex;gap:10px;align-items:baseline;flex-wrap:wrap}
+  .prose h2 .num{flex:none;font-family:var(--mono);font-size:11.5px;color:var(--accent);
+                 border:1px solid var(--accent);border-radius:20px;padding:2px 9px}
+  .prose h3{font-size:13.5px;font-weight:600;color:var(--ink);margin:24px 0 8px;letter-spacing:.01em}
+  .prose p{line-height:1.8;color:var(--ink-2);max-width:68ch;margin:12px 0}
+  .prose p b{color:var(--ink);font-weight:600}
+  .prose ul{margin:12px 0;padding-left:20px;color:var(--ink-2);line-height:1.8;max-width:68ch}
+  .prose li{margin:4px 0}
+  .callout{margin:16px 0;padding:12px 16px 12px 15px;background:var(--surface);border-left:3px solid var(--accent);
+           border-radius:0 10px 10px 0;line-height:1.75;color:var(--ink-2);max-width:68ch}
+  .callout b{color:var(--accent)}
+  .tw{overflow-x:auto;margin:16px 0}
+  table{border-collapse:collapse;width:100%;font-size:13px;min-width:440px}
+  th{text-align:left;font-weight:600;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--faint);
+     padding:0 16px 9px 0;border-bottom:1px solid var(--line);white-space:nowrap}
+  td{padding:11px 16px 11px 0;border-bottom:1px solid var(--line-soft);color:var(--ink-2);line-height:1.65;vertical-align:top}
+  td:first-child{color:var(--ink)}
+  td b{font-weight:600;color:var(--ink)}
+  pre{margin:12px 0;padding:13px 15px;background:var(--surface);border:1px solid var(--line);border-radius:10px;
+      overflow-x:auto;font-family:var(--mono);font-size:12.5px;line-height:1.75;color:var(--ink-2)}
+  pre .c{color:var(--faint)}
+  pre .a{color:var(--accent)}
+  pre.good{border-color:var(--accent);background:var(--surface-hi)}
+  pre.bad{border-style:dashed}
+  .pair{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:14px;margin:16px 0}
+  .pair pre{margin:0}
+  .lbl{margin:0 0 6px;font-size:11.5px;color:var(--muted)}
+  .lbl.ok{color:var(--accent)}
+  .defs{display:grid;grid-template-columns:repeat(auto-fit,minmax(238px,1fr));gap:12px;margin:16px 0}
+  .def{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:13px 16px}
+  .def h4{margin:0 0 6px;font-size:13.5px;font-weight:600}
+  .def h4 span{font-family:var(--mono);font-size:10.5px;color:var(--faint);font-weight:400;margin-left:6px}
+  .def p{margin:0;font-size:13px;line-height:1.7;max-width:none}
+  .layers{margin:16px 0;display:flex;flex-direction:column;gap:6px;max-width:660px}
+  .layer{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:baseline;gap:4px 16px;
+         background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:12px 16px}
+  .layer.core{background:var(--surface-hi);border-color:var(--accent)}
+  .layer .nm{font-size:14px}
+  .layer .nm small{font-family:var(--mono);font-size:11px;color:var(--faint);margin-left:7px}
+  .layer.core .nm{color:var(--accent);font-weight:600}
+  .layer .ds{font-size:12.5px;color:var(--muted)}
+  .agg{margin:16px 0;max-width:560px;border:1px dashed var(--chip-line);border-radius:12px;padding:14px 16px}
+  .agg .cap{margin:0 0 11px;font-size:11.5px;color:var(--muted)}
+  .agg .root{display:inline-flex;gap:9px;align-items:baseline;background:var(--surface-hi);border:1px solid var(--accent);
+             border-radius:8px;padding:8px 12px;font-family:var(--mono);font-size:13px;color:var(--accent)}
+  .agg .root em{font-style:normal;font-family:var(--sans);font-size:11px}
+  .agg .kids{margin:10px 0 0 16px;padding-left:15px;border-left:1px solid var(--line);
+             display:flex;flex-direction:column;gap:7px}
+  .agg .kid{display:flex;flex-wrap:wrap;gap:4px 9px;align-items:baseline;font-family:var(--mono);font-size:12.5px;color:var(--ink-2)}
+  .agg .kid span{font-family:var(--sans);font-size:11px;color:var(--faint)}
+  .cols2{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px;margin:16px 0}
+  .box{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px 16px}
+  .box.yes{border-color:var(--accent)}
+  .box h4{margin:0 0 8px;font-size:13px;font-weight:600}
+  .box.yes h4{color:var(--accent)}
+  .box ul{margin:0;padding-left:18px;font-size:13px;line-height:1.8}
+  .takeaways{margin:16px 0;display:flex;flex-direction:column;gap:10px;max-width:900px}
+  .takeaway{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:12px 16px;
+            line-height:1.75;color:var(--ink-2);font-size:13.5px}
+  .takeaway b{display:block;color:var(--ink);margin-bottom:2px}
+
+  footer{margin-top:32px;padding-top:16px;border-top:1px solid var(--line);color:var(--muted);font-size:12.5px;line-height:1.8;
+         display:flex;flex-wrap:wrap;justify-content:space-between;gap:6px 24px}
+  footer code{font-size:11px;border-bottom-width:1px}
+</style>
+
+<div class="shell">
+  <aside class="side">
+    <div class="brand">
+      <svg class="logo" viewBox="0 0 100 100" aria-hidden="true">
+        <g fill="var(--accent)">
+          <g id="petal"><path d="M50 10 L54 46 L50 50 L46 46 Z"/></g>
+          <use href="#petal" transform="rotate(30 50 50)"/><use href="#petal" transform="rotate(60 50 50)"/>
+          <use href="#petal" transform="rotate(90 50 50)"/><use href="#petal" transform="rotate(120 50 50)"/>
+          <use href="#petal" transform="rotate(150 50 50)"/><use href="#petal" transform="rotate(180 50 50)"/>
+          <use href="#petal" transform="rotate(210 50 50)"/><use href="#petal" transform="rotate(240 50 50)"/>
+          <use href="#petal" transform="rotate(270 50 50)"/><use href="#petal" transform="rotate(300 50 50)"/>
+          <use href="#petal" transform="rotate(330 50 50)"/>
+        </g>
+      </svg>
+      <span><b>速查库</b><small>Claude Code · DDD</small></span>
+    </div>
+
+    <nav aria-label="页面">
+      <p class="navgroup">Claude Code</p>
+      <button type="button" data-page="cfg" aria-current="page">配置项<span class="n">46</span></button>
+      <button type="button" data-page="cmd" aria-current="false">斜杠命令<span class="n">115</span></button>
+      <button type="button" data-page="key" aria-current="false">快捷键<span class="n">183</span></button>
+      <p class="navgroup">架构方法</p>
+      <button type="button" data-page="ddd" aria-current="false">DDD 学习笔记<span class="n">10 节</span></button>
+    </nav>
+
+    <p class="sidefoot">用户设置 <code>~/.claude/settings.json</code><br>全局配置 <code>~/.claude.json</code><br>快捷键 <code>~/.claude/keybindings.json</code></p>
+  </aside>
+
+  <main>
+    <h1 id="ph-t"></h1>
+    <p class="lede" id="ph-d"></p>
+
+    <div class="toolbar" id="toolbar">
+      <label class="search" for="q">
+        <span class="slash" aria-hidden="true">/</span>
+        <input id="q" type="search" autocomplete="off" spellcheck="false" placeholder="按 / 开始搜索，如 compact、权限、ctrl+o、撤销" aria-label="搜索当前页">
+      </label>
+      <span class="count" id="count" aria-live="polite"></span>
+    </div>
+
+    <div class="legend" id="legend">
+      <span data-p="cfg"><span class="pill def">默认值</span>配置项的默认选项</span>
+      <span data-p="cmd"><span class="alias">/别名</span>命令别名</span>
+      <span data-p="cmd"><span class="tag skill">技能</span>内置 Skill，本质是一段提示词</span>
+      <span data-p="cmd"><span class="tag wf">工作流</span>后台编排多个子 agent</span>
+      <span data-p="cmd"><span class="tag guess">推断</span>官方文档没有写，按名称推断</span>
+      <span data-p="key"><span class="alt"><kbd>ctrl</kbd><span class="plus">+</span><kbd>x</kbd><span class="chord">▸</span><kbd>ctrl</kbd><span class="plus">+</span><kbd>k</kbd></span>先按前一组，松开再按后一组</span>
+      <span data-p="key"><kbd>y</kbd><span class="or">或</span><kbd>enter</kbd>效果相同的等价键位</span>
+    </div>
+
+    <section class="page on" id="page-cfg"><div class="groups" id="cfg"></div></section>
+    <section class="page" id="page-cmd"><div class="groups" id="cmd"></div></section>
+    <section class="page" id="page-key"><div class="groups" id="key"></div></section>
+
+    <section class="page" id="page-ddd">
+      <div class="toc">
+        <a href="#d1">一 · 什么是 DDD</a><a href="#d2">二 · 核心概念</a><a href="#d3">三 · 战术模式</a>
+        <a href="#d4">四 · 分层架构</a><a href="#d5">五 · 聚合与聚合根</a><a href="#d6">六 · 限界上下文</a>
+        <a href="#d7">七 · 代码示例</a><a href="#d8">八 · 职责边界</a><a href="#d9">九 · 何时用</a><a href="#d10">十 · 总结</a>
+      </div>
+
+      <div class="prose">
+        <section id="d1">
+          <h2><span class="num">一</span>什么是 DDD</h2>
+          <p>DDD 是 Eric Evans 在 2003 年提出的一套<b>软件设计方法论</b>，核心思想是：<b>软件的复杂度应该来自业务领域本身，而不是技术实现</b>。设计软件时以业务领域为中心，让代码反映真实的业务模型。</p>
+        </section>
+
+        <section id="d2">
+          <h2><span class="num">二</span>核心概念</h2>
+          <div class="defs">
+            <div class="def"><h4>领域<span>Domain</span></h4><p>软件要解决的业务问题空间。比如电商领域的「下单、支付、库存」。</p></div>
+            <div class="def"><h4>领域模型<span>Domain Model</span></h4><p>对业务概念的抽象表示。不是数据库表结构，而是业务语言中的实体和规则。</p></div>
+            <div class="def"><h4>统一语言<span>Ubiquitous Language</span></h4><p>开发者和业务人员使用同一套术语沟通。代码里的类名、方法名直接用业务术语。</p></div>
+            <div class="def"><h4>限界上下文<span>Bounded Context</span></h4><p>同一个词在不同业务模块里含义不同，划清边界，每个上下文有自己独立的模型。</p></div>
+          </div>
+          <div class="pair">
+            <div>
+              <p class="lbl">反面 — 技术语言</p>
+              <pre class="bad">dao.updateStatus(orderId, 3);</pre>
+            </div>
+            <div>
+              <p class="lbl ok">正面 — 业务语言</p>
+              <pre class="good">order.pay();</pre>
+            </div>
+          </div>
+        </section>
+
+        <section id="d3">
+          <h2><span class="num">三</span>战术模式（代码层面）</h2>
+          <div class="tw"><table>
+            <thead><tr><th>概念</th><th>说明</th><th>代码形态</th></tr></thead>
+            <tbody>
+              <tr><td><b>聚合根</b> Aggregate Root</td><td>聚合的入口，负责维护内部一致性</td><td>实体类，如 <code>class Order</code></td></tr>
+              <tr><td><b>实体</b> Entity</td><td>有唯一标识，生命周期可追踪</td><td>类，如 <code>class OrderItem</code></td></tr>
+              <tr><td><b>值对象</b> Value Object</td><td>没有唯一标识，靠属性值判断相等，不可变</td><td>不可变类，如 <code>class Money</code></td></tr>
+              <tr><td><b>领域事件</b> Domain Event</td><td>表示领域中发生的有意义的事情</td><td>类，如 <code>class OrderSubmittedEvent</code></td></tr>
+              <tr><td><b>仓储</b> Repository</td><td>模拟集合的持久化接口，只暴露聚合根的存取</td><td>接口，如 <code>interface OrderRepository</code></td></tr>
+              <tr><td><b>领域服务</b> Domain Service</td><td>不属于任何实体的业务逻辑</td><td>类，如 <code>class TransferService</code></td></tr>
+              <tr><td><b>枚举</b> Enum</td><td>有限状态集合</td><td>枚举，如 <code>enum OrderState</code></td></tr>
+            </tbody>
+          </table></div>
+        </section>
+
+        <section id="d4">
+          <h2><span class="num">四</span>分层架构</h2>
+          <div class="layers">
+            <div class="layer"><span class="nm">用户界面层<small>UI / API</small></span><span class="ds">接收请求，返回响应</span></div>
+            <div class="layer"><span class="nm">应用层<small>Application</small></span><span class="ds">编排流程，不含业务规则</span></div>
+            <div class="layer core"><span class="nm">领域层<small>Domain</small></span><span class="ds">核心业务逻辑，不依赖外部</span></div>
+            <div class="layer"><span class="nm">基础设施层<small>Infrastructure</small></span><span class="ds">数据库、消息队列、外部 API</span></div>
+          </div>
+          <div class="callout"><b>领域层不依赖任何外层。</b>数据库、框架都是可替换的，业务规则才是核心。</div>
+        </section>
+
+        <section id="d5">
+          <h2><span class="num">五</span>聚合与聚合根</h2>
+
+          <h3>5.1 概念 vs 类</h3>
+          <div class="tw"><table>
+            <thead><tr><th>术语</th><th>本质</th></tr></thead>
+            <tbody>
+              <tr><td><b>聚合</b> Aggregate</td><td>概念，逻辑分组，没有对应的 class</td></tr>
+              <tr><td><b>聚合根</b> Aggregate Root</td><td>代码，具体的类，如 <code>class Order</code></td></tr>
+            </tbody>
+          </table></div>
+          <p><b>聚合是整个家族，聚合根是族长。</b></p>
+          <div class="agg">
+            <p class="cap">Order 聚合</p>
+            <div class="root">Order <em>聚合根 · 族长</em></div>
+            <div class="kids">
+              <div class="kid">OrderItem <span>实体</span></div>
+              <div class="kid">OrderItem <span>实体</span></div>
+              <div class="kid">ShippingAddress <span>值对象</span></div>
+              <div class="kid">OrderMoney <span>值对象</span></div>
+              <div class="kid">OrderState <span>枚举</span></div>
+            </div>
+          </div>
+
+          <h3>5.2 聚合内部 vs 聚合之间</h3>
+          <div class="pair">
+            <div>
+              <p class="lbl ok">聚合内部 — 直接调用，事务一致</p>
+              <pre class="good">order.addItem(coffee, 2);</pre>
+            </div>
+            <div>
+              <p class="lbl">聚合之间 — 通过领域事件解耦</p>
+              <pre>OrderSubmittedEvent event = order.submit();
+
+<span class="c">// CouponService 听到事件 → 标记优惠券已使用</span>
+<span class="c">// InventoryService 听到事件 → 扣减库存</span></pre>
+            </div>
+          </div>
+
+          <h3>5.3 一个领域模型可以有多个聚合</h3>
+          <pre>order/                          <span class="c">← 订单领域的领域模型</span>
+├── Order.java                  <span class="a">← 聚合根（聚合 1：订单）</span>
+│   ├── OrderItem.java          <span class="c">← 聚合内部实体</span>
+│   └── OrderMoney.java         <span class="c">← 值对象</span>
+│
+├── ShoppingCart.java           <span class="a">← 聚合根（聚合 2：购物车）</span>
+│   └── CartItem.java           <span class="c">← 聚合内部实体</span>
+│
+└── Coupon.java                 <span class="a">← 聚合根（聚合 3：优惠券）</span>
+    └── CouponRule.java         <span class="c">← 值对象</span></pre>
+          <p>聚合之间<b>通过 ID 引用</b>，不直接持有对方：</p>
+          <pre><span class="c">// Order 引用 Coupon，但不持有 Coupon 对象</span>
+private CouponId appliedCouponId;  <span class="c">// 值对象，只是个标识</span></pre>
+
+          <h3>5.4 聚合边界怎么画</h3>
+          <div class="tw"><table>
+            <thead><tr><th>问题</th><th>答案指向</th></tr></thead>
+            <tbody>
+              <tr><td>这两个对象必须在<b>同一个事务</b>中修改吗？</td><td>是 → 同一个聚合</td></tr>
+              <tr><td>这个对象离开另一个对象能<b>独立存在</b>吗？</td><td>能 → 不同聚合</td></tr>
+              <tr><td>这个对象是被<b>整体替换</b>还是<b>独立生命周期</b>？</td><td>整体替换 → 值对象；独立生命 → 另一个聚合的引用</td></tr>
+            </tbody>
+          </table></div>
+
+          <h3>5.5 持久化也体现聚合根的门卫角色</h3>
+          <pre><span class="c">// 只有聚合根有仓储，没有 OrderItemRepository</span>
+public interface OrderRepository {
+    Order findById(OrderId id);      <span class="c">// 查出来是整个聚合</span>
+    void save(Order order);          <span class="c">// 存进去也是整个聚合</span>
+}</pre>
+        </section>
+
+        <section id="d6">
+          <h2><span class="num">六</span>限界上下文</h2>
+          <h3>6.1 核心思想</h3>
+          <p>同一件事，在不同场景下长不同的样子。现实中「商品」的例子：</p>
+          <div class="tw"><table>
+            <thead><tr><th>场景</th><th>关注什么</th><th>不关心什么</th></tr></thead>
+            <tbody>
+              <tr><td>仓库管理员</td><td>库位、重量、长宽高</td><td>价格、评价</td></tr>
+              <tr><td>销售</td><td>价格、折扣、促销</td><td>库位、重量</td></tr>
+              <tr><td>客服</td><td>退换货政策、保修期</td><td>库位、价格</td></tr>
+              <tr><td>物流</td><td>体积、重量、是否易碎</td><td>价格、评价</td></tr>
+            </tbody>
+          </table></div>
+
+          <h3>6.2 代码层面：同一杯「咖啡」的三种样子</h3>
+          <div class="pair">
+            <div>
+              <p class="lbl">菜单上下文 Menu</p>
+              <pre>public class Coffee {
+    private String name;
+    private Money price;
+    private String description;
+}</pre>
+            </div>
+            <div>
+              <p class="lbl">库存上下文 Inventory</p>
+              <pre>public class CoffeeStock {
+    private String coffeeName;
+    private int quantity;
+    private String warehouseLocation;
+}</pre>
+            </div>
+            <div>
+              <p class="lbl">订单上下文 Order</p>
+              <pre>public class CoffeeLineItem {
+    private String coffeeName;
+    private int quantity;
+    private Money subtotal;
+}</pre>
+            </div>
+          </div>
+          <p>它们之间通过<b>名字或 ID</b> 关联，而不是共享一个类。</p>
+
+          <h3>6.3 为什么不能用一个类</h3>
+          <pre class="bad"><span class="c">// 大一统模型 — 反面教材</span>
+public class Coffee {
+    private String name;
+    private Money price;
+    private String description;      <span class="c">// 菜单需要</span>
+    private int stock;               <span class="c">// 库存需要</span>
+    private String warehouse;        <span class="c">// 库存需要</span>
+    private String returnPolicy;     <span class="c">// 客服需要</span>
+    private double weight;           <span class="c">// 物流需要</span>
+    private double volume;           <span class="c">// 物流需要</span>
+    private List&lt;Review&gt; reviews;    <span class="c">// 营销需要</span>
+}</pre>
+          <ul>
+            <li>菜单团队改了 <code>name</code>，订单团队的逻辑可能挂掉</li>
+            <li>库存团队加个字段，要等所有团队都同意</li>
+            <li>一个类十几个字段，没人知道哪些跟自己有关</li>
+          </ul>
+
+          <h3>6.4 上下文之间的映射关系</h3>
+          <div class="tw"><table>
+            <thead><tr><th>模式</th><th>含义</th></tr></thead>
+            <tbody>
+              <tr><td><b>共享内核</b> Shared Kernel</td><td>两个上下文共享一小部分模型</td></tr>
+              <tr><td><b>客户-供应商</b> Customer-Supplier</td><td>上游提供数据，下游消费</td></tr>
+              <tr><td><b>防腐层</b> Anti-Corruption Layer</td><td>下游建一层适配器，隔离上游模型</td></tr>
+              <tr><td><b>开放主机服务</b> Open Host Service</td><td>上游提供标准 API 供多个下游调用</td></tr>
+            </tbody>
+          </table></div>
+        </section>
+
+        <section id="d7">
+          <h2><span class="num">七</span>完整领域模型代码示例</h2>
+          <pre>order/
+├── Order.java                 <span class="a">← 聚合根</span>
+├── OrderId.java               <span class="c">← 值对象（标识）</span>
+├── OrderItem.java             <span class="c">← 实体（聚合内部）</span>
+├── OrderState.java            <span class="c">← 枚举（状态机）</span>
+├── OrderMoney.java            <span class="c">← 值对象（金额计算）</span>
+├── OrderSubmittedEvent.java   <span class="c">← 领域事件</span>
+├── OrderRepository.java       <span class="c">← 仓储接口</span>
+└── OrderService.java          <span class="c">← 领域服务</span></pre>
+
+          <h3>聚合根</h3>
+          <pre class="good">public class Order {
+    private OrderId id;
+    private String customer;
+    private List&lt;OrderItem&gt; items = new ArrayList&lt;&gt;();
+    private OrderState state = OrderState.DRAFT;
+    private OrderMoney total;
+
+    public void addItem(Coffee coffee, int quantity) {
+        if (state != OrderState.DRAFT) {
+            throw new IllegalStateException("已提交的订单不能修改");
+        }
+        items.add(new OrderItem(coffee, quantity));
+        recalculateTotal();
+    }
+
+    public OrderSubmittedEvent submit() {
+        if (items.isEmpty()) {
+            throw new IllegalStateException("空订单不能提交");
+        }
+        this.state = OrderState.SUBMITTED;
+        return new OrderSubmittedEvent(this.id, this.customer, this.total);
+    }
+
+    private void recalculateTotal() {
+        this.total = items.stream()
+            .map(OrderItem::subtotal)
+            .reduce(OrderMoney.ZERO, OrderMoney::add);
+    }
+}</pre>
+
+          <h3>值对象</h3>
+          <pre>public class OrderMoney {
+    private final BigDecimal amount;
+    private final Currency currency;
+
+    public OrderMoney multiply(int factor) {
+        return new OrderMoney(amount.multiply(BigDecimal.valueOf(factor)), currency);
+    }
+
+    public OrderMoney add(OrderMoney other) {
+        assertSameCurrency(other);
+        return new OrderMoney(amount.add(other.amount), currency);
+    }
+}</pre>
+
+          <h3>领域事件</h3>
+          <pre>public class OrderSubmittedEvent {
+    private final OrderId orderId;
+    private final String customer;
+    private final OrderMoney total;
+    private final LocalDateTime occurredAt;
+}</pre>
+
+          <h3>仓储接口</h3>
+          <pre>public interface OrderRepository {
+    Order findById(OrderId id);
+    void save(Order order);
+    List&lt;Order&gt; findByCustomer(String customer);
+}</pre>
+
+          <h3>领域服务</h3>
+          <pre>public class OrderService {
+    private final OrderRepository repository;
+    private final InventoryService inventory;
+
+    public Order createOrder(String customer, List&lt;OrderRequest&gt; requests) {
+        Order order = new Order(customer);
+        for (OrderRequest req : requests) {
+            Coffee coffee = inventory.findCoffee(req.getCoffeeName());
+            if (!inventory.isAvailable(coffee, req.getQuantity())) {
+                throw new OutOfStockException(coffee.getName());
+            }
+            order.addItem(coffee, req.getQuantity());
+        }
+        return order;
+    }
+}</pre>
+        </section>
+
+        <section id="d8">
+          <h2><span class="num">八</span>各类的职责边界</h2>
+          <div class="tw"><table>
+            <thead><tr><th>类型</th><th>有 ID</th><th>可变</th><th>职责</th></tr></thead>
+            <tbody>
+              <tr><td><b>聚合根</b> Order</td><td>有</td><td>是</td><td>维护内部一致性，暴露行为</td></tr>
+              <tr><td><b>实体</b> OrderItem</td><td>有</td><td>是</td><td>聚合内部的对象，通过聚合根访问</td></tr>
+              <tr><td><b>值对象</b> OrderMoney、OrderId</td><td>无</td><td>不可变</td><td>描述属性，靠值判等</td></tr>
+              <tr><td><b>枚举</b> OrderState</td><td>无</td><td>不可变</td><td>有限状态集合</td></tr>
+              <tr><td><b>领域事件</b> OrderSubmittedEvent</td><td>无</td><td>不可变</td><td>记录发生了什么</td></tr>
+              <tr><td><b>仓储接口</b> OrderRepository</td><td>—</td><td>—</td><td>持久化抽象，实现放在基础设施层</td></tr>
+              <tr><td><b>领域服务</b> OrderService</td><td>—</td><td>—</td><td>跨实体、跨聚合的业务逻辑</td></tr>
+            </tbody>
+          </table></div>
+        </section>
+
+        <section id="d9">
+          <h2><span class="num">九</span>什么时候用 DDD</h2>
+          <div class="cols2">
+            <div class="box yes">
+              <h4>适合</h4>
+              <ul><li>业务逻辑复杂（金融、电商、物流）</li><li>团队规模较大，需要统一语言</li><li>长期维护的核心系统</li></ul>
+            </div>
+            <div class="box">
+              <h4>不适合</h4>
+              <ul><li>简单 CRUD 应用</li><li>小型项目、原型</li><li>一次性脚本或短期项目</li></ul>
+            </div>
+          </div>
+        </section>
+
+        <section id="d10">
+          <h2><span class="num">十</span>总结</h2>
+          <div class="takeaways">
+            <div class="takeaway"><b>概念管「怎么想」，类管「怎么写」</b>聚合、领域模型、限界上下文是脑中的画布；聚合根、实体、值对象是画布上的笔触。</div>
+            <div class="takeaway"><b>领域模型是一个团队，不是一个人</b>聚合根是队长，值对象是工具，实体是队员，事件是传话筒。</div>
+            <div class="takeaway"><b>聚合是房子，聚合根是门</b>所有人只能从门进出，内部秩序由门卫保证。</div>
+            <div class="takeaway"><b>限界上下文就是给不同场景画墙</b>同一个业务概念在不同场景下含义不同，就应该有各自的模型，各自独立演进。</div>
+            <div class="takeaway"><b>DDD 不是技术框架，而是一种思维方式</b>让代码忠实地反映业务，而不是让业务去迁就技术。</div>
+          </div>
+        </section>
+      </div>
+    </section>
+
+    <p class="empty" id="empty" hidden>没有匹配的条目。换个关键词试试，或按 <code>Esc</code> 清空搜索。</p>
+
+    <footer id="foot"></footer>
+  </main>
+</div>
+
+<script src="data.js"></script>
+<script src="keys.js"></script>
+<script>
+  const TAG = {skill:'<span class="tag skill">技能</span>', wf:'<span class="tag wf">工作流</span>'};
+  const plain = s => s.replace(/<[^>]+>/g, "").replace(/&lt;/g, "<").replace(/&gt;/g, ">").toLowerCase();
+  const pills = spec => spec.split("|").map(o => o.endsWith("*")
+    ? `<span class="pill def">${o.slice(0, -1)}</span>` : `<span class="pill">${o}</span>`).join("");
+
+  const cfgRow = ([name, key, desc, opts, guess]) => ({
+    text: plain([name, key, desc, opts].join(" ")),
+    html: `<li><div class="head"><code>${name}</code>${key !== "—" ? `<span class="key">${key}</span>` : ""}${guess ? '<span class="tag guess">推断</span>' : ""}</div>
+      <div class="desc">${desc}</div><div class="opts">${pills(opts)}</div></li>`
+  });
+  const cmdRow = ([c, arg, al, tag, desc]) => ({
+    text: plain([c, arg, al ? al.split("|").map(a => "/" + a).join(" ") : "", tag === "skill" ? "技能 skill" : tag === "wf" ? "工作流 workflow" : "", desc].join(" ")),
+    html: `<li><div class="head">${c.split("|").map(x => `<code>${x}</code>`).join('<span class="sep">/</span>')}${arg ? `<span class="arg">${arg}</span>` : ""}${al ? al.split("|").map(a => `<span class="alias">/${a}</span>`).join("") : ""}${tag ? TAG[tag] : ""}</div>
+      <div class="desc">${desc}</div></li>`
+  });
+  const combo = s => s.split("+").map(k => `<kbd>${k}</kbd>`).join('<span class="plus">+</span>');
+  const keyRow = ([spec, desc]) => ({
+    text: plain(spec.replace(/\|/g, " ") + " " + desc),
+    html: `<li><div class="head">${spec.split("|").map(alt => `<span class="alt">${alt.split(" ").map(combo).join('<span class="chord">▸</span>')}</span>`).join('<span class="or">或</span>')}</div>
+      <div class="desc">${desc}</div></li>`
+  });
+
+  // 预先把每组转换成可筛选的结构，搜索时只重建 HTML
+  const build = (data, rowFn) => Object.values(data).map(g => ({...g, items: g.rows.map(rowFn), groupText: plain(g.t + " " + g.cn)}));
+  const GROUPS = {cfg: build(CFG, cfgRow), cmd: build(CMD, cmdRow), key: build(KEYS, keyRow)};
+
+  // 各页的标题、导语、页脚；TOTAL 是未搜索时侧边栏显示的条目数，UNIT 是计数单位
+  const PAGES = {
+    cfg: {t:"/config 设置项",
+          d:'设置界面里的 <b>46 项</b>配置。灰色小字是写进 settings 的键名，可以用 <code>/config key=value</code> 直接设置。依据 2026-09-15 抓取的官方文档（CLI 2.1.272），2026-09-29 按 CLI 2.1.284 的文档复核增补。',
+          foot:['用户设置 <code>~/.claude/settings.json</code> · 全局配置 <code>~/.claude.json</code>', '来源 <code>code.claude.com/docs/en/settings-reference</code>']},
+    cmd: {t:"斜杠命令",
+          d:'官方文档列出的全部 <b>115 条</b>命令（2026-09-29 按 CLI 2.1.284 核对）。只在消息开头识别，后面的文字作为参数；Claude 回复中途发出的命令会排队，<code>/status</code>、<code>/tasks</code>、<code>/usage</code> 除外。',
+          foot:['虚线框是命令别名，标签区分技能、工作流和推断', '来源 <code>code.claude.com/docs/en/commands</code>']},
+    key: {t:"快捷键",
+          d:'22 个场景的 <b>183 个</b>键位：本机 keybindings.json 的 173 个，加上 CLI 2.1.284 官方文档新增的 10 个。按生效场景分组，同一个键在不同界面含义不同；<code>meta</code> 在 macOS 终端通常是 Option，和 <code>cmd</code> 不是一个键。',
+          foot:['自定义键位写在 <code>~/.claude/keybindings.json</code>', '来源 <code>code.claude.com/docs/en/keybindings</code>']},
+    ddd: {t:"DDD 学习笔记",
+          d:'领域驱动设计的十节笔记：从统一语言和限界上下文，到聚合、值对象、领域事件怎么落到代码里。示例是一套咖啡订单模型。',
+          foot:['原始笔记 <code>raw/sources/2026-07-30-DDD学习笔记.md</code>', '整理页 <code>wiki/concepts/领域驱动设计（DDD）.md</code>']}
+  };
+  const TOTAL = {cfg:"46", cmd:"115", key:"183"};
+  const UNIT = {cfg:" 项配置", cmd:" 行命令", key:" 行快捷键"};
+
+  const q = document.getElementById("q");
+  const countEl = document.getElementById("count");
+  const emptyEl = document.getElementById("empty");
+  const toolbar = document.getElementById("toolbar");
+  const legendEl = document.getElementById("legend");
+  const footEl = document.getElementById("foot");
+  const headT = document.getElementById("ph-t");
+  const headD = document.getElementById("ph-d");
+  const navButtons = [...document.querySelectorAll("nav button")];
+  let page = "cfg";
+
+  function render() {
+    const terms = q.value.trim().toLowerCase().split(/\s+/).filter(Boolean);
+    const per = {};
+    for (const id of ["cfg", "cmd", "key"]) {
+      let html = "", n = 0;
+      for (const g of GROUPS[id]) {
+        if (g.hi && terms.length) continue; // 搜索时隐藏「最常用」，避免与分组里的同名条目重复出现
+        const hits = g.items.filter(it => terms.every(t => it.text.includes(t) || g.groupText.includes(t)));
+        if (!hits.length) continue;
+        if (!g.hi) n += hits.length;
+        html += `<div class="card${g.hi ? " hi" : ""}${g.dim ? " dim" : ""}"><h3>${g.t}<span class="cn">${g.cn}</span></h3>${g.note ? `<p class="note">${g.note}</p>` : ""}<ul>${hits.map(h => h.html).join("")}</ul></div>`;
+      }
+      document.getElementById(id).innerHTML = html;
+      per[id] = n;
+      const btn = navButtons.find(b => b.dataset.page === id);
+      btn.querySelector(".n").textContent = terms.length ? n : TOTAL[id];
+      btn.classList.toggle("hit", terms.length > 0 && n > 0);
+    }
+    if (page === "ddd") { emptyEl.hidden = true; return; }
+    emptyEl.hidden = per[page] > 0;
+    countEl.textContent = (terms.length ? "匹配 " : "") + per[page] + UNIT[page];
+  }
+
+  function go(id, push) {
+    if (!PAGES[id]) id = "cfg";
+    page = id;
+    navButtons.forEach(b => b.setAttribute("aria-current", b.dataset.page === id ? "page" : "false"));
+    document.querySelectorAll(".page").forEach(s => s.classList.toggle("on", s.id === "page-" + id));
+    headT.textContent = PAGES[id].t;
+    headD.innerHTML = PAGES[id].d;
+    toolbar.hidden = id === "ddd";
+    legendEl.hidden = id === "ddd";
+    [...legendEl.children].forEach(el => el.hidden = el.dataset.p !== id);
+    footEl.innerHTML = PAGES[id].foot.map(x => `<span>${x}</span>`).join("");
+    if (push) { history.replaceState(null, "", "#" + id); window.scrollTo({top: 0}); }
+    render();
+  }
+
+  navButtons.forEach(b => b.addEventListener("click", () => go(b.dataset.page, true)));
+  q.addEventListener("input", render);
+  q.addEventListener("keydown", e => { if (e.key === "Escape") { q.value = ""; render(); } });
+  document.addEventListener("keydown", e => {
+    const typing = /^(INPUT|TEXTAREA|SELECT)$/.test(document.activeElement?.tagName);
+    if (e.key === "/" && !typing && !e.metaKey && !e.ctrlKey && page !== "ddd") { e.preventDefault(); q.focus(); }
+  });
+  go(location.hash.replace("#", "") || "cfg", false);
+</script>
